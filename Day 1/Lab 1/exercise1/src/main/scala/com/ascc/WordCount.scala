@@ -1,4 +1,4 @@
-package course2.module1
+package com.ascc
 
 import org.apache.spark.SparkContext
 import com.ascc.util.Files
@@ -16,6 +16,7 @@ object WordCount {
         Files.rmrf(outPath)  // delete old output (DON'T DO THIS IN PRODUCTION!)
         println("...creating SparkContext\n")
         val sc = new SparkContext("local[*]", "WordCount")
+        sc.setLogLevel("WARN")
         println("...SparkContext created\n")
         try {
             val input = sc.textFile(inPath)
