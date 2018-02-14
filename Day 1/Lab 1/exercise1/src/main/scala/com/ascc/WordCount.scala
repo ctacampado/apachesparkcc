@@ -20,20 +20,21 @@ object WordCount {
         sc.setLogLevel("WARN")
         try {
             val input = sc.textFile(inPath)
-            val wc = input
+            /*val wc = input
                 .map(_.toLowerCase)
                 .flatMap(text => text.split("""\W+"""))
                 .map(word => (word, 1))
                 .groupByKey()
                 .mapValues(group => group.size)
-                .sortBy(_._2, false)
+                .sortBy(_._2, false)*/
 
-/*            val wc = input
+            val wc = input
                 .map(_.toLowerCase)
                 .flatMap(text => text.split("""\W+"""))
+                .filter(_ != "")
                 .map(word => (word, 1))
                 .reduceByKey(_ + _)
-                .sortBy(_._2, false)*/
+                .sortBy(_._2, false)
 
             println("Writing output to: $outPath")
             wc.saveAsTextFile(outPath)
