@@ -5,40 +5,40 @@ import com.ascc.util.Files
 
 /**
   * Count the words in a corpus of documents.
-  * This version uses the familiar GROUP BY, but we'll see a more efficient
-  * version next.
   */
 object WordCount {
 
     def main(args: Array[String]): Unit = {
-        val inPath  = "resources/all-shakespeare.txt"
+        val inPath = "resources/all-shakespeare.txt"
         val outPath = "output/word_count1"
-        Files.rmrf(outPath)  // delete old output (DON'T DO THIS IN PRODUCTION!)
-        println("...creating SparkContext\n")
-        val sc = new SparkContext("local[*]", "WordCount")
+        Files.rmrf(outPath) // delete old output (DON'T DO THIS IN PRODUCTION!)
+
+        val sc = new SparkContext("local[*]", "WordCount")  // create SparkContext where local[*] means run Spark
+                                                            // locally with as many worker threads as logical
+                                                            // cores on your machine. WordCount pertains to
+                                                            // the App Name (spark's point of view)
         sc.setLogLevel("WARN")
-        println("...SparkContext created\n")
         try {
             val input = sc.textFile(inPath)
             val wc = input
                 .map(_.toLowerCase)
                 .flatMap(text => text.split("""\W+"""))
-                .groupBy(word => word)  // Like SQL GROUP BY: RDD[(String,Iterator[String])]
-                .mapValues(group => group.size)  // RDD[(String,Int)]
+                .map(word => (word, 1))
+                .groupByKey()
+                .mapValues(group => group.size)
+                .sortBy(_._2, false)
 
-            println(s"Writing output to: $outPath")
+/*            val wc = input
+                .map(_.toLowerCase)
+                .flatMap(text => text.split("""\W+"""))
+                .map(word => (word, 1))
+                .reduceByKey(_ + _)
+                .sortBy(_._2, false)*/
+
+            println("Writing output to: $outPath")
             wc.saveAsTextFile(outPath)
-            //wc.sortBy(_._2, false).collect().foreach(println)
-            printMsg("Enter any key to finish the job...")
-            Console.in.read()
         } finally {
             sc.stop()
         }
-    }
-
-    private def printMsg(m: String) = {
-        println("")
-        println(m)
-        println("")
     }
 }
